@@ -29,7 +29,7 @@ class DefaultIFDSTabulationProblem : public IFDSTabulationProblem<N, D, M, I> {
 protected:
   I icfg;
   virtual D createZeroValue() = 0;
-  D zerovalue = createZeroValue();
+  D zerovalue;
 
 public:
   DefaultIFDSTabulationProblem(I icfg) : icfg(icfg) {

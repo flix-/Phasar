@@ -22,35 +22,34 @@
 #include <string>
 #include <vector>
 
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Instruction.h>
+#include <llvm/IR/Value.h>
+
 #include <phasar/PhasarLLVM/IfdsIde/DefaultIFDSTabulationProblem.h>
 #include <phasar/PhasarLLVM/IfdsIde/LLVMZeroValue.h>
 #include <phasar/PhasarLLVM/Domain/ExtendedValue.h>
 #include <phasar/Utils/LLVMShorthands.h>
-
-namespace llvm {
-class Function;
-class Instruction;
-class Value;
-} // namespace llvm
 
 namespace psr {
 
 class LLVMBasedICFG;
 
 class IFDSTabulationProblemPluginExtendedValue
-    : public DefaultIFDSTabulationProblem<
-          const llvm::Instruction *, ExtendedValue,
-          const llvm::Function *, LLVMBasedICFG &> {
+    : public DefaultIFDSTabulationProblem<const llvm::Instruction*,
+                                          ExtendedValue,
+                                          const llvm::Function*,
+                                          LLVMBasedICFG &> {
 protected:
   std::vector<std::string> EntryPoints;
 
 public:
   IFDSTabulationProblemPluginExtendedValue(LLVMBasedICFG &ICFG,
-                              std::vector<std::string> EntryPoints = {"main"})
-      : DefaultIFDSTabulationProblem<const llvm::Instruction *,
+                                           std::vector<std::string> EntryPoints = {"main"})
+      : DefaultIFDSTabulationProblem<const llvm::Instruction*,
                                      ExtendedValue,
-                                     const llvm::Function *, LLVMBasedICFG &>(
-            ICFG),
+                                     const llvm::Function*,
+                                     LLVMBasedICFG &>(ICFG),
         EntryPoints(EntryPoints) {
     DefaultIFDSTabulationProblem::zerovalue = createZeroValue();
   }

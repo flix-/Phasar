@@ -1,19 +1,24 @@
 #ifndef EXTENDEDVALUE_H
 #define EXTENDEDVALUE_H
 
+#include <cassert>
 #include <cstdint>
+#include <functional>
 
-#include <llvm/IR/Value.h>
+namespace llvm {
+class Value;
+} // namespace llvm
 
 namespace psr {
 
 class ExtendedValue {
 public:
+  ExtendedValue() {}
   ExtendedValue(const llvm::Value* _value,
                 const llvm::Value* _patchedMemLocationFrame = nullptr)
     : value(_value),
-      patchedMemLocationFrame(_patchedMemLocationFrame)
-  {
+      patchedMemLocationFrame(_patchedMemLocationFrame) {
+
     assert(value != nullptr && "ExtendedValue requires a Value object");
   }
   ~ExtendedValue() = default;
@@ -22,25 +27,9 @@ public:
     return value == rhs.value &&
            patchedMemLocationFrame == rhs.patchedMemLocationFrame;
   }
-  bool operator!=(const ExtendedValue &rhs) const {
-    return value != rhs.value &&
-           patchedMemLocationFrame != rhs.patchedMemLocationFrame;
-  }
   bool operator<(const ExtendedValue &rhs) const {
-    return value < rhs.value &&
-           patchedMemLocationFrame < rhs.patchedMemLocationFrame;
-  }
-  bool operator>(const ExtendedValue &rhs) const {
-    return value > rhs.value &&
-           patchedMemLocationFrame > rhs.patchedMemLocationFrame;
-  }
-  bool operator<=(const ExtendedValue &rhs) const {
-    return value <= rhs.value &&
-           patchedMemLocationFrame <= rhs.patchedMemLocationFrame;
-  }
-  bool operator>=(const ExtendedValue &rhs) const {
-    return value >= rhs.value &&
-           patchedMemLocationFrame >= rhs.patchedMemLocationFrame;
+    return std::less<const llvm::Value*>()(value, rhs.value) ||
+           std::less<const llvm::Value*>()(patchedMemLocationFrame, rhs.patchedMemLocationFrame);
   }
 
   const llvm::Value* getValue() const { return value; }
@@ -71,3 +60,4 @@ struct hash<psr::ExtendedValue> {
 } // namespace std
 
 #endif // EXTENDEDVALUE_H
+
