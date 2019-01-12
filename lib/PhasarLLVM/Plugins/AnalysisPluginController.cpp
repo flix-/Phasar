@@ -14,6 +14,7 @@
 #include <phasar/PhasarLLVM/Mono/Solver/LLVMIntraMonoSolver.h>
 #include <phasar/PhasarLLVM/Plugins/Interfaces/IfdsIde/IDETabulationProblemPlugin.h>
 #include <phasar/PhasarLLVM/Plugins/Interfaces/IfdsIde/IFDSTabulationProblemPlugin.h>
+#include <phasar/PhasarLLVM/Plugins/Interfaces/IfdsIde/IFDSTabulationProblemPluginExtendedValue.h>
 #include <phasar/PhasarLLVM/Plugins/Interfaces/Mono/InterMonoProblemPlugin.h>
 #include <phasar/PhasarLLVM/Plugins/Interfaces/Mono/IntraMonoProblemPlugin.h>
 #include <phasar/Utils/Logger.h>
@@ -51,6 +52,20 @@ AnalysisPluginController::AnalysisPluginController(
         FinalResultsJson += llvmifdstestsolver.getAsJson();
       }
     }
+    if (!IFDSTabulationProblemPluginExtendedValueFactory.empty()) {
+      for (auto &Problem : IFDSTabulationProblemPluginExtendedValueFactory) {
+        LOG_IF_ENABLE(BOOST_LOG_SEV(lg, INFO)
+                      << "Solving plugin: " << Problem.first);
+        unique_ptr<IFDSTabulationProblemPluginExtendedValue> plugin(
+            Problem.second(ICFG, EntryPoints));
+        cout << "DONE" << endl;
+        LLVMIFDSSolver<ExtendedValue, LLVMBasedICFG &> llvmifdstestsolver(
+            *plugin, true);
+        llvmifdstestsolver.solve();
+        plugin->printReport();
+        FinalResultsJson += llvmifdstestsolver.getAsJson();
+      }
+    }
     if (!InterMonoProblemPluginFactory.empty()) {
       for (auto Problem : InterMonoProblemPluginFactory) {
         LOG_IF_ENABLE(BOOST_LOG_SEV(lg, INFO)
@@ -58,9 +73,17 @@ AnalysisPluginController::AnalysisPluginController(
       }
     }
     if (!IntraMonoProblemPluginFactory.empty()) {
+      LLVMBasedCFG CFG;
+      const llvm::Function *F = ICFG.getMethod(EntryPoints.front());
+
       for (auto Problem : IntraMonoProblemPluginFactory) {
         LOG_IF_ENABLE(BOOST_LOG_SEV(lg, INFO)
                       << "Solving plugin: " << Problem.first);
+        unique_ptr<IntraMonoProblemPlugin> plugin(
+              Problem.second(CFG, F));
+        cout << "DONE" << endl;
+        LLVMIntraMonoSolver<const llvm::Value*, LLVMBasedCFG&> solver(*plugin, true, true);
+        solver.solve();
       }
     }
   }

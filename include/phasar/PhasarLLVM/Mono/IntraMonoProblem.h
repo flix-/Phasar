@@ -41,6 +41,8 @@ public:
   virtual bool sqSubSetEqual(const MonoSet<D> &Lhs, const MonoSet<D> &Rhs) = 0;
   virtual MonoSet<D> flow(N S, const MonoSet<D> &In) = 0;
   virtual MonoMap<N, MonoSet<D>> initialSeeds() = 0;
+
+  virtual void printReport() {}
 };
 
 } // namespace psr

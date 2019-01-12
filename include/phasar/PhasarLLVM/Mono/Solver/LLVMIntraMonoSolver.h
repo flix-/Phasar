@@ -31,6 +31,7 @@ class LLVMIntraMonoSolver : public IntraMonoSolver<const llvm::Instruction *, D,
                                                    const llvm::Function *, C> {
 protected:
   bool DUMP_RESULTS;
+  bool PRINT_REPORT;
   // Duplicate of the IMProblem of IntraMonoSolver ...
   IntraMonoProblem<const llvm::Instruction *, D, const llvm::Function *, C>
       &IMP;
@@ -41,17 +42,22 @@ public:
 
   LLVMIntraMonoSolver(IntraMonoProblem<const llvm::Instruction *, D,
                                        const llvm::Function *, C> &problem,
-                      bool dumpResults = false)
+                      bool dumpResults = false,
+                      bool printReport = false)
       : IntraMonoSolver<const llvm::Instruction *, D, const llvm::Function *,
                         C>(problem),
-        DUMP_RESULTS(dumpResults), IMP(problem) {}
+        DUMP_RESULTS(dumpResults), PRINT_REPORT(printReport), IMP(problem) {}
 
   virtual void solve() override {
     // do the solving of the analaysis problem
     IntraMonoSolver<const llvm::Instruction *, D, const llvm::Function *,
                     C>::solve();
-    if (DUMP_RESULTS)
+    if (DUMP_RESULTS) {
       dumpResults();
+    }
+    if (PRINT_REPORT) {
+      this->IMP.printReport();
+    }
   }
 
   void dumpResults() {
