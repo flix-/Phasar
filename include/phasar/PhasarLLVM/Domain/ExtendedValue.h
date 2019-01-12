@@ -23,11 +23,11 @@ public:
   }
   ~ExtendedValue() = default;
 
-  bool operator==(const ExtendedValue &rhs) const {
+  bool operator==(const ExtendedValue& rhs) const {
     return value == rhs.value &&
            patchedMemLocationFrame == rhs.patchedMemLocationFrame;
   }
-  bool operator<(const ExtendedValue &rhs) const {
+  bool operator<(const ExtendedValue& rhs) const {
     return std::less<const llvm::Value*>()(value, rhs.value) ||
            std::less<const llvm::Value*>()(patchedMemLocationFrame, rhs.patchedMemLocationFrame);
   }
