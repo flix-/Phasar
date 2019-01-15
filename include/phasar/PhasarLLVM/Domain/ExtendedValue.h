@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
+#include <tuple>
 
 namespace llvm {
 class Value;
@@ -14,8 +15,8 @@ namespace psr {
 class ExtendedValue {
 public:
   ExtendedValue() {}
-  ExtendedValue(const llvm::Value* _value,
-                const llvm::Value* _patchedMemLocationFrame = nullptr)
+  explicit ExtendedValue(const llvm::Value* _value,
+                         const llvm::Value* _patchedMemLocationFrame = nullptr)
     : value(_value),
       patchedMemLocationFrame(_patchedMemLocationFrame) {
 
@@ -28,8 +29,13 @@ public:
            patchedMemLocationFrame == rhs.patchedMemLocationFrame;
   }
   bool operator<(const ExtendedValue& rhs) const {
-    return std::less<const llvm::Value*>()(value, rhs.value) ||
-           std::less<const llvm::Value*>()(patchedMemLocationFrame, rhs.patchedMemLocationFrame);
+    uintptr_t numValue = reinterpret_cast<uintptr_t>(value);
+    uintptr_t numPatchedMemLocationFrame = reinterpret_cast<uintptr_t>(patchedMemLocationFrame);
+
+    uintptr_t numRhsValue = reinterpret_cast<uintptr_t>(rhs.getValue());
+    uintptr_t numRhsPatchedMemLocationFrame = reinterpret_cast<uintptr_t>(rhs.getPatchedMemLocationFrame());
+
+    return std::tie(numValue, numPatchedMemLocationFrame) < std::tie(numRhsValue, numRhsPatchedMemLocationFrame);
   }
 
   const llvm::Value* getValue() const { return value; }
