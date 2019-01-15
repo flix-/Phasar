@@ -4,7 +4,6 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
-#include <tuple>
 
 namespace llvm {
 class Value;
@@ -29,13 +28,9 @@ public:
            patchedMemLocationFrame == rhs.patchedMemLocationFrame;
   }
   bool operator<(const ExtendedValue& rhs) const {
-    uintptr_t numValue = reinterpret_cast<uintptr_t>(value);
-    uintptr_t numPatchedMemLocationFrame = reinterpret_cast<uintptr_t>(patchedMemLocationFrame);
-
-    uintptr_t numRhsValue = reinterpret_cast<uintptr_t>(rhs.getValue());
-    uintptr_t numRhsPatchedMemLocationFrame = reinterpret_cast<uintptr_t>(rhs.getPatchedMemLocationFrame());
-
-    return std::tie(numValue, numPatchedMemLocationFrame) < std::tie(numRhsValue, numRhsPatchedMemLocationFrame);
+    if (std::less<const llvm::Value*>()(value, rhs.value)) return true;
+    if (std::less<const llvm::Value*>()(rhs.value, value)) return false;
+    return std::less<const llvm::Value*>()(patchedMemLocationFrame, rhs.patchedMemLocationFrame);
   }
 
   const llvm::Value* getValue() const { return value; }
