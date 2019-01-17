@@ -71,6 +71,11 @@ public:
   void printDataFlowFact(std::ostream &os,
                          ExtendedValue ev) const override {
     os << llvmIRToString(ev.getValue());
+    os << "\n";
+    for (const auto memLocationPart : ev.getMemLocationSeq()) {
+      os << llvmIRToString(memLocationPart);
+      os << "\n";
+    }
   }
 
   void printMethod(std::ostream &os, const llvm::Function *m) const override {
