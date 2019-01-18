@@ -35,15 +35,15 @@ public:
   }
 
   bool operator<(const ExtendedValue& rhs) const {
-    if (std::less<std::size_t>()(memLocationSeq.size(), rhs.memLocationSeq.size())) return true;
-    if (std::less<std::size_t>()(rhs.memLocationSeq.size(), memLocationSeq.size())) return false;
+    if (std::less<std::size_t>{}(memLocationSeq.size(), rhs.memLocationSeq.size())) return true;
+    if (std::less<std::size_t>{}(rhs.memLocationSeq.size(), memLocationSeq.size())) return false;
 
     for (std::size_t i = 0; i < memLocationSeq.size(); ++i) {
-      if (std::less<const llvm::Value*>()(memLocationSeq[i], rhs.memLocationSeq[i])) return true;
-      if (std::less<const llvm::Value*>()(rhs.memLocationSeq[i], memLocationSeq[i])) return false;
+      if (std::less<const llvm::Value*>{}(memLocationSeq[i], rhs.memLocationSeq[i])) return true;
+      if (std::less<const llvm::Value*>{}(rhs.memLocationSeq[i], memLocationSeq[i])) return false;
     }
 
-    return std::less<const llvm::Value*>()(value, rhs.value);
+    return std::less<const llvm::Value*>{}(value, rhs.value);
   }
 
   const llvm::Value* getValue() const { return value; }
