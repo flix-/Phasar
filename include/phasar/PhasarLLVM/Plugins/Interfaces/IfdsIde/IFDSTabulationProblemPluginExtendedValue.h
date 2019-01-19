@@ -70,11 +70,12 @@ public:
 
   void printDataFlowFact(std::ostream &os,
                          ExtendedValue ev) const override {
-    os << llvmIRToString(ev.getValue());
-    os << "\n";
+    os << llvmIRToString(ev.getValue()) << "\n";
     for (const auto memLocationPart : ev.getMemLocationSeq()) {
-      os << llvmIRToString(memLocationPart);
-      os << "\n";
+      os << "A:\t" << llvmIRToString(memLocationPart) << "\n";
+    }
+    if (!ev.getEndOfTaintedBlockLabel().empty()) {
+        os << "L:\t" << ev.getEndOfTaintedBlockLabel() << "\n";
     }
   }
 

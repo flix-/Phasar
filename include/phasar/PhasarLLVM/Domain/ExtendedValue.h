@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <functional>
+#include <string>
 #include <vector>
 
 namespace llvm {
@@ -31,10 +32,16 @@ public:
       if (!isMemLocationPartEqual) return false;
     }
 
+    bool isEndOfTaintedBlockLabelEqual = endOfTaintedBlockLabel == rhs.endOfTaintedBlockLabel;
+    if (!isEndOfTaintedBlockLabelEqual) return false;
+
     return true;
   }
 
   bool operator<(const ExtendedValue& rhs) const {
+    if (std::less<const llvm::Value*>{}(value, rhs.value)) return true;
+    if (std::less<const llvm::Value*>{}(rhs.value, value)) return false;
+
     if (std::less<std::size_t>{}(memLocationSeq.size(), rhs.memLocationSeq.size())) return true;
     if (std::less<std::size_t>{}(rhs.memLocationSeq.size(), memLocationSeq.size())) return false;
 
@@ -43,7 +50,7 @@ public:
       if (std::less<const llvm::Value*>{}(rhs.memLocationSeq[i], memLocationSeq[i])) return false;
     }
 
-    return std::less<const llvm::Value*>{}(value, rhs.value);
+    return std::less<std::string>{}(endOfTaintedBlockLabel, rhs.endOfTaintedBlockLabel);
   }
 
   const llvm::Value* getValue() const { return value; }
@@ -54,9 +61,13 @@ public:
   const llvm::Value* getMemLocationFrame() const { return memLocationSeq.empty() ? nullptr : memLocationSeq[0]; }
   void setMemLocationFrame(const llvm::Value* _memLocationFrame) { if (!memLocationSeq.empty()) memLocationSeq[0] = _memLocationFrame; }
 
+  const std::string getEndOfTaintedBlockLabel() const { return endOfTaintedBlockLabel; }
+  void setEndOfTaintedBlockLabel(std::string _endOfTaintedBlockLabel) { endOfTaintedBlockLabel = _endOfTaintedBlockLabel; }
+
 private:
   const llvm::Value* value;
   std::vector<const llvm::Value*> memLocationSeq;
+  std::string endOfTaintedBlockLabel;
 };
 
 } // namespace psr
@@ -74,6 +85,8 @@ struct hash<psr::ExtendedValue> {
     for (const auto memLocationPart : ev.getMemLocationSeq()) {
       seed ^= hash<const llvm::Value*>{}(memLocationPart) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
+
+    seed ^= hash<string>{}(ev.getEndOfTaintedBlockLabel()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
     return seed;
   }
