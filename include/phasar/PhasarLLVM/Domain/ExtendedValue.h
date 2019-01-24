@@ -8,6 +8,7 @@
 
 namespace llvm {
 class Value;
+class CallInst;
 } // namespace llvm
 
 namespace psr {
@@ -35,6 +36,9 @@ public:
     bool isEndOfTaintedBlockLabelEqual = endOfTaintedBlockLabel == rhs.endOfTaintedBlockLabel;
     if (!isEndOfTaintedBlockLabelEqual) return false;
 
+    bool isCalleeEqual = callee == rhs.callee;
+    if (!isCalleeEqual) return false;
+
     return true;
   }
 
@@ -50,7 +54,10 @@ public:
       if (std::less<const llvm::Value*>{}(rhs.memLocationSeq[i], memLocationSeq[i])) return false;
     }
 
-    return std::less<std::string>{}(endOfTaintedBlockLabel, rhs.endOfTaintedBlockLabel);
+    if (std::less<std::string>{}(endOfTaintedBlockLabel, rhs.endOfTaintedBlockLabel)) return true;
+    if (std::less<std::string>{}(rhs.endOfTaintedBlockLabel, endOfTaintedBlockLabel)) return false;
+
+    return std::less<const llvm::CallInst*>{}(callee, rhs.callee);
   }
 
   const llvm::Value* getValue() const { return value; }
@@ -64,10 +71,15 @@ public:
   const std::string getEndOfTaintedBlockLabel() const { return endOfTaintedBlockLabel; }
   void setEndOfTaintedBlockLabel(std::string _endOfTaintedBlockLabel) { endOfTaintedBlockLabel = _endOfTaintedBlockLabel; }
 
+  const llvm::CallInst* getCallee() const { return callee; }
+  void setCallee(const llvm::CallInst* _callee) { callee = _callee; }
+  void resetCallee() { callee = nullptr; }
+
 private:
-  const llvm::Value* value;
+  const llvm::Value* value = nullptr;
   std::vector<const llvm::Value*> memLocationSeq;
   std::string endOfTaintedBlockLabel;
+  const llvm::CallInst* callee = nullptr;
 };
 
 } // namespace psr
@@ -87,6 +99,8 @@ struct hash<psr::ExtendedValue> {
     }
 
     seed ^= hash<string>{}(ev.getEndOfTaintedBlockLabel()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+
+    seed ^= hash<const llvm::CallInst*>{}(ev.getCallee()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
     return seed;
   }
