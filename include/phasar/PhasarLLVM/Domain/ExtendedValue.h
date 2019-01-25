@@ -8,7 +8,6 @@
 
 namespace llvm {
 class Value;
-class CallInst;
 } // namespace llvm
 
 namespace psr {
@@ -36,9 +35,6 @@ public:
     bool isEndOfTaintedBlockLabelEqual = endOfTaintedBlockLabel == rhs.endOfTaintedBlockLabel;
     if (!isEndOfTaintedBlockLabelEqual) return false;
 
-    bool isCalleeEqual = callee == rhs.callee;
-    if (!isCalleeEqual) return false;
-
     return true;
   }
 
@@ -54,10 +50,7 @@ public:
       if (std::less<const llvm::Value*>{}(rhs.memLocationSeq[i], memLocationSeq[i])) return false;
     }
 
-    if (std::less<std::string>{}(endOfTaintedBlockLabel, rhs.endOfTaintedBlockLabel)) return true;
-    if (std::less<std::string>{}(rhs.endOfTaintedBlockLabel, endOfTaintedBlockLabel)) return false;
-
-    return std::less<const llvm::CallInst*>{}(callee, rhs.callee);
+    return std::less<std::string>{}(endOfTaintedBlockLabel, rhs.endOfTaintedBlockLabel);
   }
 
   const llvm::Value* getValue() const { return value; }
@@ -65,21 +58,13 @@ public:
   const std::vector<const llvm::Value*> getMemLocationSeq() const { return memLocationSeq; }
   void setMemLocationSeq(std::vector<const llvm::Value*> _memLocationSeq) { memLocationSeq = _memLocationSeq; }
 
-  const llvm::Value* getMemLocationFrame() const { return memLocationSeq.empty() ? nullptr : memLocationSeq[0]; }
-  void setMemLocationFrame(const llvm::Value* _memLocationFrame) { if (!memLocationSeq.empty()) memLocationSeq[0] = _memLocationFrame; }
-
   const std::string getEndOfTaintedBlockLabel() const { return endOfTaintedBlockLabel; }
   void setEndOfTaintedBlockLabel(std::string _endOfTaintedBlockLabel) { endOfTaintedBlockLabel = _endOfTaintedBlockLabel; }
-
-  const llvm::CallInst* getCallee() const { return callee; }
-  void setCallee(const llvm::CallInst* _callee) { callee = _callee; }
-  void resetCallee() { callee = nullptr; }
 
 private:
   const llvm::Value* value = nullptr;
   std::vector<const llvm::Value*> memLocationSeq;
   std::string endOfTaintedBlockLabel;
-  const llvm::CallInst* callee = nullptr;
 };
 
 } // namespace psr
@@ -99,8 +84,6 @@ struct hash<psr::ExtendedValue> {
     }
 
     seed ^= hash<string>{}(ev.getEndOfTaintedBlockLabel()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-
-    seed ^= hash<const llvm::CallInst*>{}(ev.getCallee()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
     return seed;
   }
