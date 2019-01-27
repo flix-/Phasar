@@ -75,7 +75,11 @@ public:
       os << "A:\t" << llvmIRToString(memLocationPart) << "\n";
     }
     if (!ev.getEndOfTaintedBlockLabel().empty()) {
-        os << "L:\t" << ev.getEndOfTaintedBlockLabel() << "\n";
+      os << "L:\t" << ev.getEndOfTaintedBlockLabel() << "\n";
+    }
+    if (ev.isVarArg()) {
+      os << "VI:\t" << ev.getVarArgIndex() << "\n";
+      os << "CI:\t" << ev.getCurrentVarArgIndex() << "\n";
     }
   }
 
