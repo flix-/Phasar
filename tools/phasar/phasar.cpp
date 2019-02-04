@@ -27,6 +27,7 @@
 #include <phasar/PhasarLLVM/Passes/GeneralStatisticsPass.h>
 #include <phasar/PhasarLLVM/Plugins/Interfaces/IfdsIde/IDETabulationProblemPlugin.h>
 #include <phasar/PhasarLLVM/Plugins/Interfaces/IfdsIde/IFDSTabulationProblemPlugin.h>
+#include <phasar/PhasarLLVM/Plugins/Interfaces/IfdsIde/IFDSTabulationProblemPluginExtendedValue.h>
 #include <phasar/PhasarLLVM/Plugins/Interfaces/Mono/InterMonoProblemPlugin.h>
 #include <phasar/PhasarLLVM/Plugins/Interfaces/Mono/IntraMonoProblemPlugin.h>
 #include <phasar/PhasarLLVM/Utils/DataFlowAnalysisType.h>
@@ -46,7 +47,7 @@ static llvm::cl::extrahelp CommonHelp(
 llvm::cl::NumOccurrencesFlag OccurrencesFlag = llvm::cl::Optional;
 
 static const string MORE_PHASAR_LLVM_HELP(
-#include "../phasar-llvm_more_help.txt"
+#include "../../phasar-llvm_more_help.txt"
     );
 static const string MORE_PHASAR_CLANG_HELP("");
 
@@ -444,10 +445,12 @@ int main(int argc, const char **argv) {
       }
     }
 
+// Useless?! Those maps are filled when the plugin is loaded which has not happend yet.
 #ifdef PHASAR_PLUGINS_ENABLED
     // Check if user has specified an analysis plugin
     if (!IDETabulationProblemPluginFactory.empty() ||
         !IFDSTabulationProblemPluginFactory.empty() ||
+        !IFDSTabulationProblemPluginExtendedValueFactory.empty() ||
         !IntraMonoProblemPluginFactory.empty() ||
         !InterMonoProblemPluginFactory.empty()) {
       ChosenDataFlowAnalyses.push_back(DataFlowAnalysisType::Plugin);
@@ -495,7 +498,7 @@ int main(int argc, const char **argv) {
         VariablesMap["printedgerec"].as<bool>(),
         VariablesMap["graph-id"].as<std::string>());
     LOG_IF_ENABLE(BOOST_LOG_SEV(lg, INFO) << "Write results to file");
-    Controller.writeResults(VariablesMap["output"].as<std::string>());
+    //Controller.writeResults(VariablesMap["output"].as<std::string>());
   } else {
     // -- Clang mode ---
     LOG_IF_ENABLE(BOOST_LOG_SEV(lg, INFO)

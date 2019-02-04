@@ -60,10 +60,10 @@ AnalysisPluginController::AnalysisPluginController(
             Problem.second(ICFG, EntryPoints));
         cout << "DONE" << endl;
         LLVMIFDSSolver<ExtendedValue, LLVMBasedICFG &> llvmifdstestsolver(
-            *plugin, true);
+            *plugin, true, false);
         llvmifdstestsolver.solve();
         plugin->printReport();
-        FinalResultsJson += llvmifdstestsolver.getAsJson();
+        //FinalResultsJson += llvmifdstestsolver.getAsJson();
       }
     }
     if (!InterMonoProblemPluginFactory.empty()) {

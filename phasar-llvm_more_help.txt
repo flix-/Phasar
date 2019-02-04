@@ -33,6 +33,7 @@ Analyses
 Currently the following analysis plugins are available:
 	
 	* IFDSTabulationProblemPlugin
+    * IFDSTabulationProblemPluginExtendedValue
 	* IDETabulationProblemPlugin
 	* IntraMonoProblemPlugin
 	* InterMonoProblemPlugin
