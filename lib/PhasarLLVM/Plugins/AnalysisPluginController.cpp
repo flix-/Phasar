@@ -59,9 +59,9 @@ AnalysisPluginController::AnalysisPluginController(
         unique_ptr<IFDSTabulationProblemPluginExtendedValue> plugin(
             Problem.second(ICFG, EntryPoints));
         cout << "DONE" << endl;
-        LLVMIFDSSolver<ExtendedValue, LLVMBasedICFG &> llvmifdstestsolver(
+        LLVMIFDSSolver<ExtendedValue, LLVMBasedICFG &> llvmifdssolver(
             *plugin, true, false);
-        llvmifdstestsolver.solve();
+        llvmifdssolver.solve();
         plugin->printReport();
         //FinalResultsJson += llvmifdstestsolver.getAsJson();
       }
