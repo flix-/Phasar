@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include <functional>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -24,16 +25,14 @@ public:
     bool isValueEqual = value == rhs.value;
     if (!isValueEqual) return false;
 
-    bool isMemLocationSizeEqual = memLocationSeq.size() == rhs.memLocationSeq.size();
-    if (!isMemLocationSizeEqual) return false;
-
-    for (std::size_t i = 0; i < memLocationSeq.size(); ++i) {
-      bool isMemLocationPartEqual = memLocationSeq[i] == rhs.memLocationSeq[i];
-      if (!isMemLocationPartEqual) return false;
-    }
+    bool isMemLocationSeqEqual = memLocationSeq == rhs.memLocationSeq;
+    if (!isMemLocationSeqEqual) return false;
 
     bool isEndOfTaintedBlockLabelEqual = endOfTaintedBlockLabel == rhs.endOfTaintedBlockLabel;
     if (!isEndOfTaintedBlockLabelEqual) return false;
+
+    bool isEndOfTaintedBlockSuccLabelsEqual = endOfTaintedBlockSuccLabels == rhs.endOfTaintedBlockSuccLabels;
+    if (!isEndOfTaintedBlockSuccLabelsEqual) return false;
 
     bool isVarArgIndexEqual = varArgIndex == rhs.varArgIndex;
     if (!isVarArgIndexEqual) return false;
@@ -48,16 +47,14 @@ public:
     if (std::less<const llvm::Value*>{}(value, rhs.value)) return true;
     if (std::less<const llvm::Value*>{}(rhs.value, value)) return false;
 
-    if (std::less<std::size_t>{}(memLocationSeq.size(), rhs.memLocationSeq.size())) return true;
-    if (std::less<std::size_t>{}(rhs.memLocationSeq.size(), memLocationSeq.size())) return false;
-
-    for (std::size_t i = 0; i < memLocationSeq.size(); ++i) {
-      if (std::less<const llvm::Value*>{}(memLocationSeq[i], rhs.memLocationSeq[i])) return true;
-      if (std::less<const llvm::Value*>{}(rhs.memLocationSeq[i], memLocationSeq[i])) return false;
-    }
+    if (memLocationSeq < rhs.memLocationSeq) return true;
+    if (rhs.memLocationSeq < memLocationSeq) return false;
 
     if (std::less<std::string>{}(endOfTaintedBlockLabel, rhs.endOfTaintedBlockLabel)) return true;
     if (std::less<std::string>{}(rhs.endOfTaintedBlockLabel, endOfTaintedBlockLabel)) return false;
+
+    if (endOfTaintedBlockSuccLabels < rhs.endOfTaintedBlockSuccLabels) return true;
+    if (rhs.endOfTaintedBlockSuccLabels < endOfTaintedBlockSuccLabels) return false;
 
     if (std::less<long>{}(varArgIndex, rhs.varArgIndex)) return true;
     if (std::less<long>{}(rhs.varArgIndex, varArgIndex)) return false;
@@ -71,7 +68,13 @@ public:
   void setMemLocationSeq(std::vector<const llvm::Value*> _memLocationSeq) { memLocationSeq = _memLocationSeq; }
 
   const std::string getEndOfTaintedBlockLabel() const { return endOfTaintedBlockLabel; }
-  void setEndOfTaintedBlockLabel(std::string _endOfTaintedBlockLabel) { endOfTaintedBlockLabel = _endOfTaintedBlockLabel; }
+  const std::set<std::string> getEndOfTaintedBlockSuccLabels() const { return endOfTaintedBlockSuccLabels; }
+  void setEndOfTaintedBlockLabels(std::string _endOfTaintedBlockLabel,
+                                  std::set<std::string> _endOfTaintedBlockSuccLabels ) {
+
+    endOfTaintedBlockLabel = _endOfTaintedBlockLabel;
+    endOfTaintedBlockSuccLabels = _endOfTaintedBlockSuccLabels;
+  }
 
   long getVarArgIndex() const { return varArgIndex; }
   void setVarArgIndex(long _varArgIndex) { varArgIndex = _varArgIndex; }
@@ -83,7 +86,9 @@ public:
 private:
   const llvm::Value* value = nullptr;
   std::vector<const llvm::Value*> memLocationSeq;
+
   std::string endOfTaintedBlockLabel;
+  std::set<std::string> endOfTaintedBlockSuccLabels;
 
   long varArgIndex = -1L;
   long currentVarArgIndex = -1L;
@@ -101,11 +106,15 @@ struct hash<psr::ExtendedValue> {
 
     seed ^= hash<const llvm::Value*>{}(ev.getValue()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
-    for (const auto memLocationPart : ev.getMemLocationSeq()) {
+    for (const auto& memLocationPart : ev.getMemLocationSeq()) {
       seed ^= hash<const llvm::Value*>{}(memLocationPart) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
 
     seed ^= hash<string>{}(ev.getEndOfTaintedBlockLabel()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+
+    for (const auto& succLabel : ev.getEndOfTaintedBlockSuccLabels()) {
+      seed ^= hash<string>{}(succLabel) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
 
     seed ^= hash<long>{}(ev.getVarArgIndex()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
