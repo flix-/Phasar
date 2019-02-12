@@ -28,9 +28,6 @@ public:
     bool isMemLocationSeqEqual = memLocationSeq == rhs.memLocationSeq;
     if (!isMemLocationSeqEqual) return false;
 
-    bool isEndOfTaintedBlockLabelEqual = endOfTaintedBlockLabel == rhs.endOfTaintedBlockLabel;
-    if (!isEndOfTaintedBlockLabelEqual) return false;
-
     bool isEndOfTaintedBlockSuccLabelsEqual = endOfTaintedBlockSuccLabels == rhs.endOfTaintedBlockSuccLabels;
     if (!isEndOfTaintedBlockSuccLabelsEqual) return false;
 
@@ -50,9 +47,6 @@ public:
     if (memLocationSeq < rhs.memLocationSeq) return true;
     if (rhs.memLocationSeq < memLocationSeq) return false;
 
-    if (std::less<std::string>{}(endOfTaintedBlockLabel, rhs.endOfTaintedBlockLabel)) return true;
-    if (std::less<std::string>{}(rhs.endOfTaintedBlockLabel, endOfTaintedBlockLabel)) return false;
-
     if (endOfTaintedBlockSuccLabels < rhs.endOfTaintedBlockSuccLabels) return true;
     if (rhs.endOfTaintedBlockSuccLabels < endOfTaintedBlockSuccLabels) return false;
 
@@ -67,14 +61,8 @@ public:
   const std::vector<const llvm::Value*> getMemLocationSeq() const { return memLocationSeq; }
   void setMemLocationSeq(std::vector<const llvm::Value*> _memLocationSeq) { memLocationSeq = _memLocationSeq; }
 
-  const std::string getEndOfTaintedBlockLabel() const { return endOfTaintedBlockLabel; }
   const std::set<std::string> getEndOfTaintedBlockSuccLabels() const { return endOfTaintedBlockSuccLabels; }
-  void setEndOfTaintedBlockLabels(std::string _endOfTaintedBlockLabel,
-                                  std::set<std::string> _endOfTaintedBlockSuccLabels ) {
-
-    endOfTaintedBlockLabel = _endOfTaintedBlockLabel;
-    endOfTaintedBlockSuccLabels = _endOfTaintedBlockSuccLabels;
-  }
+  void setEndOfTaintedBlockSuccLabels(std::set<std::string> _endOfTaintedBlockSuccLabels ) { endOfTaintedBlockSuccLabels = _endOfTaintedBlockSuccLabels; }
 
   long getVarArgIndex() const { return varArgIndex; }
   void setVarArgIndex(long _varArgIndex) { varArgIndex = _varArgIndex; }
@@ -86,8 +74,6 @@ public:
 private:
   const llvm::Value* value = nullptr;
   std::vector<const llvm::Value*> memLocationSeq;
-
-  std::string endOfTaintedBlockLabel;
   std::set<std::string> endOfTaintedBlockSuccLabels;
 
   long varArgIndex = -1L;
@@ -109,8 +95,6 @@ struct hash<psr::ExtendedValue> {
     for (const auto& memLocationPart : ev.getMemLocationSeq()) {
       seed ^= hash<const llvm::Value*>{}(memLocationPart) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
-
-    seed ^= hash<string>{}(ev.getEndOfTaintedBlockLabel()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 
     for (const auto& succLabel : ev.getEndOfTaintedBlockSuccLabels()) {
       seed ^= hash<string>{}(succLabel) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
