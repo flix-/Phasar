@@ -37,12 +37,14 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2
     make && \
     make install
 
-# copy source code
-ADD . /opt/framework
+# copy llvm install script
+ADD ./utils/install-llvm-5.0.1.sh /opt
 
 # build and install llvm
-RUN cd /opt/framework/utils && \
-    ./install-llvm-5.0.1.sh $(nproc) ~/
+RUN ./opt/install-llvm-5.0.1.sh $(nproc) ~/
+
+# copy source code
+ADD . /opt/framework
 
 # build framework
 RUN cd /opt/framework && \
@@ -50,3 +52,4 @@ RUN cd /opt/framework && \
     cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release .. && \
     make -j $(nproc)
+
