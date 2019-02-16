@@ -38,10 +38,10 @@ RUN wget https://github.com/Kitware/CMake/releases/download/v3.13.2/cmake-3.13.2
     make install
 
 # copy llvm install script
-ADD ./utils/install-llvm-5.0.1.sh /opt
+COPY ./utils/install-llvm-5.0.1.sh /opt/
 
 # build and install llvm
-RUN ./opt/install-llvm-5.0.1.sh $(nproc) ~/
+RUN ./opt/install-llvm-5.0.1.sh $(nproc) /opt/
 
 # copy source code
 ADD . /opt/framework
@@ -51,5 +51,20 @@ RUN cd /opt/framework && \
     mkdir build && \
     cd build && \
     cmake -DCMAKE_BUILD_TYPE=Release .. && \
+    make -j $(nproc) && \
+    make install
+
+WORKDIR /opt
+RUN git clone https://github.com/flix-/environment-variable-tracing.git && \
+    mkdir build && \
+    cd build && \
+    cmake -DCMAKE_BUILD_TYPE=Release ../environment-variable-tracing && \
     make -j $(nproc)
+
+RUN sed -i "/^my \$PHASAR_BIN/s/=.*$/= '\/usr\/local\/bin\/phasar';/" environment-variable-tracing/Tools/run-analysis.pl && \
+    sed -i "/^my \$PLUGIN/s/=.*$/= '\/opt\/build\/IFDSEnvironmentVariableTracing\/libIFDSEnvironmentVariableTracing.so';/" environment-variable-tracing/Tools/run-analysis.pl && \
+    cp environment-variable-tracing/Tools/* /usr/local/bin
+
+RUN apt-get -y install locales lcov vim && \
+    locale-gen en_US.UTF-8
 
