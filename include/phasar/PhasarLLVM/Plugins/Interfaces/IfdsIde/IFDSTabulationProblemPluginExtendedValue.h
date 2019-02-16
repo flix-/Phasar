@@ -74,6 +74,9 @@ public:
     for (const auto memLocationPart : ev.getMemLocationSeq()) {
       os << "A:\t" << llvmIRToString(memLocationPart) << "\n";
     }
+    if (!ev.getEndOfTaintedBlockLabel().empty()) {
+      os << "L:\t" << ev.getEndOfTaintedBlockLabel() << "\n";
+    }
     if (ev.isVarArg()) {
       os << "VI:\t" << ev.getVarArgIndex() << "\n";
       os << "CI:\t" << ev.getCurrentVarArgIndex() << "\n";
