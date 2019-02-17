@@ -43,6 +43,9 @@ COPY ./utils/install-llvm-5.0.1.sh /opt/
 # build and install llvm
 RUN ./opt/install-llvm-5.0.1.sh $(nproc) /opt/
 
+RUN apt-get -y install locales lcov vim && \
+    locale-gen en_US.UTF-8
+
 # copy source code
 ADD . /opt/framework
 
@@ -64,7 +67,4 @@ RUN git clone https://github.com/flix-/environment-variable-tracing.git && \
 RUN sed -i "/^my \$PHASAR_BIN/s/=.*$/= '\/usr\/local\/bin\/phasar';/" environment-variable-tracing/Tools/run-analysis.pl && \
     sed -i "/^my \$PLUGIN/s/=.*$/= '\/opt\/build\/IFDSEnvironmentVariableTracing\/libIFDSEnvironmentVariableTracing.so';/" environment-variable-tracing/Tools/run-analysis.pl && \
     cp environment-variable-tracing/Tools/* /usr/local/bin
-
-RUN apt-get -y install locales lcov vim && \
-    locale-gen en_US.UTF-8
 
