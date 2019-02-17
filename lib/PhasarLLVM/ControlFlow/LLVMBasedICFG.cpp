@@ -211,11 +211,13 @@ void LLVMBasedICFG::constructionWalker(const llvm::Function *F,
                       << llvmIRToString(cs.getInstruction()));
         // call the resolve routine
         set<string> possible_target_names;
+        /*
         if (isVirtualFunctionCall(cs)) {
           possible_target_names = resolver->resolveVirtualCall(cs);
         } else {
           possible_target_names = resolver->resolveFunctionPointer(cs);
         }
+        */
 
         for (auto &possible_target_name : possible_target_names) {
           if (IRDB.getFunction(possible_target_name)) {
