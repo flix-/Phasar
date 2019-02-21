@@ -1,3 +1,7 @@
+/**
+  * @author Sebastian Roland <sebastianwolfgang.roland@stud.tu-darmstadt.de>
+  */
+
 #ifndef EXTENDEDVALUE_H
 #define EXTENDEDVALUE_H
 
@@ -21,6 +25,7 @@ public:
   ~ExtendedValue() = default;
 
   bool operator==(const ExtendedValue& rhs) const {
+
     bool isValueEqual = value == rhs.value;
     if (!isValueEqual) return false;
 
@@ -29,6 +34,9 @@ public:
 
     bool isEndOfTaintedBlockLabelEqual = endOfTaintedBlockLabel == rhs.endOfTaintedBlockLabel;
     if (!isEndOfTaintedBlockLabelEqual) return false;
+
+    bool isVaListMemLocationSeqEqual = vaListMemLocationSeq == rhs.vaListMemLocationSeq;
+    if (!isVaListMemLocationSeqEqual) return false;
 
     bool isVarArgIndexEqual = varArgIndex == rhs.varArgIndex;
     if (!isVarArgIndexEqual) return false;
@@ -40,6 +48,7 @@ public:
   }
 
   bool operator<(const ExtendedValue& rhs) const {
+
     if (std::less<const llvm::Value*>{}(value, rhs.value)) return true;
     if (std::less<const llvm::Value*>{}(rhs.value, value)) return false;
 
@@ -48,6 +57,9 @@ public:
 
     if (std::less<std::string>{}(endOfTaintedBlockLabel, rhs.endOfTaintedBlockLabel)) return true;
     if (std::less<std::string>{}(rhs.endOfTaintedBlockLabel, endOfTaintedBlockLabel)) return false;
+
+    if (vaListMemLocationSeq < rhs.vaListMemLocationSeq) return true;
+    if (rhs.vaListMemLocationSeq < vaListMemLocationSeq) return false;
 
     if (std::less<long>{}(varArgIndex, rhs.varArgIndex)) return true;
     if (std::less<long>{}(rhs.varArgIndex, varArgIndex)) return false;
@@ -63,18 +75,27 @@ public:
   const std::string getEndOfTaintedBlockLabel() const { return endOfTaintedBlockLabel; }
   void setEndOfTaintedBlockLabel(std::string _endOfTaintedBlockLabel) { endOfTaintedBlockLabel = _endOfTaintedBlockLabel; }
 
+
+  const std::vector<const llvm::Value*> getVaListMemLocationSeq() const { return vaListMemLocationSeq; }
+  void setVaListMemLocationSeq(std::vector<const llvm::Value*> _vaListMemLocationSeq) { vaListMemLocationSeq = _vaListMemLocationSeq; }
+
   long getVarArgIndex() const { return varArgIndex; }
   void setVarArgIndex(long _varArgIndex) { varArgIndex = _varArgIndex; }
-  void resetVarArgIndex() { varArgIndex = -1L; }
+
+  void resetVarArgIndex() { if (!isVarArgTemplate()) varArgIndex = -1L; }
+
   long getCurrentVarArgIndex() const { return currentVarArgIndex; }
-  void incrementCurrentVarArgIndex() { ++currentVarArgIndex; }
+  void incrementCurrentVarArgIndex() { if (!isVarArgTemplate()) ++currentVarArgIndex; }
+
   bool isVarArg() const { return varArgIndex > -1L; }
+  bool isVarArgTemplate() const { return vaListMemLocationSeq.empty() && isVarArg(); }
 
 private:
   const llvm::Value* value = nullptr;
   std::vector<const llvm::Value*> memLocationSeq;
   std::string endOfTaintedBlockLabel;
 
+  std::vector<const llvm::Value*> vaListMemLocationSeq;
   long varArgIndex = -1L;
   long currentVarArgIndex = -1L;
 };
@@ -87,6 +108,7 @@ template<>
 struct hash<psr::ExtendedValue> {
 
   std::size_t operator()(const psr::ExtendedValue& ev) const {
+
     std::size_t seed = 0x4711;
 
     seed ^= hash<const llvm::Value*>{}(ev.getValue()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
@@ -96,6 +118,10 @@ struct hash<psr::ExtendedValue> {
     }
 
     seed ^= hash<string>{}(ev.getEndOfTaintedBlockLabel()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+
+    for (const auto& vaListMemLocationPart : ev.getVaListMemLocationSeq()) {
+      seed ^= hash<const llvm::Value*>{}(vaListMemLocationPart) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
 
     seed ^= hash<long>{}(ev.getVarArgIndex()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 

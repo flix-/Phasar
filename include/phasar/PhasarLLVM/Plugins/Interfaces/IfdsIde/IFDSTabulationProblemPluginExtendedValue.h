@@ -78,6 +78,10 @@ public:
       os << "L:\t" << ev.getEndOfTaintedBlockLabel() << "\n";
     }
     if (ev.isVarArg()) {
+      os << "VT:\t" << ev.isVarArgTemplate() << "\n";
+      for (const auto vaListMemLocationPart : ev.getVaListMemLocationSeq()) {
+        os << "VLA:\t" << llvmIRToString(vaListMemLocationPart) << "\n";
+      }
       os << "VI:\t" << ev.getVarArgIndex() << "\n";
       os << "CI:\t" << ev.getCurrentVarArgIndex() << "\n";
     }
