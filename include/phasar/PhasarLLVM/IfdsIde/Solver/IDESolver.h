@@ -17,6 +17,7 @@
 #ifndef PHASAR_PHASARLLVM_IFDSIDE_SOLVER_IDESOLVER_H_
 #define PHASAR_PHASARLLVM_IFDSIDE_SOLVER_IDESOLVER_H_
 
+#include <ctime>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -32,6 +33,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
+#include <llvm/IR/Instructions.h>
 #include <llvm/Support/raw_ostream.h>
 
 #include <phasar/PhasarLLVM/IfdsIde/EdgeFunction.h>
@@ -52,6 +54,8 @@
 #include <phasar/Utils/Logger.h>
 #include <phasar/Utils/PAMMMacros.h>
 #include <phasar/Utils/Table.h>
+
+#include <chrono>
 
 namespace psr {
 
@@ -907,7 +911,17 @@ protected:
     auto &lg = lg::get();
     PAMM_GET_INSTANCE;
     for (const auto &seed : initialSeeds) {
+
       N startPoint = seed.first;
+
+      const llvm::Instruction* inst = static_cast<const llvm::Instruction*>(startPoint);
+      const auto functionName = inst->getParent()->getParent()->getName();
+      std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+      std::time_t timeT1 = std::chrono::high_resolution_clock::to_time_t(t1);
+
+      llvm::outs() << std::ctime(&timeT1) << " Start processing: " << functionName << "\n";
+      llvm::outs().flush();
+
       LOG_IF_ENABLE(BOOST_LOG_SEV(lg, DEBUG)
                     << "Start point: "
                     << ideTabulationProblem.NtoString(startPoint));
@@ -924,6 +938,13 @@ protected:
       }
       jumpFn->addFunction(zeroValue, startPoint, zeroValue,
                           EdgeIdentity<V>::getInstance());
+
+      std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+      std::time_t timeT2 = std::chrono::high_resolution_clock::to_time_t(t2);
+      auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+
+      llvm::outs() << std::ctime(&timeT2) << " End processing: " << functionName << ", Duration: " << duration << "ms" << "\n";
+      llvm::outs().flush();
     }
   }
 
