@@ -61,7 +61,8 @@ WORKDIR /opt
 RUN git clone https://github.com/flix-/environment-variable-tracing.git && \
     mkdir build && \
     cd build && \
-    cmake -DCMAKE_BUILD_TYPE=Release ../environment-variable-tracing && \
+    cmake -DCMAKE_BUILD_TYPE=Debug ../environment-variable-tracing && \
+#    cmake -DCMAKE_BUILD_TYPE=Release ../environment-variable-tracing && \
     make -j $(nproc)
 
 RUN sed -i "/^my \$PHASAR_BIN/s/=.*$/= '\/usr\/local\/bin\/phasar';/" environment-variable-tracing/Tools/run-analysis.pl && \
