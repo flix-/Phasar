@@ -47,7 +47,7 @@ static llvm::cl::extrahelp CommonHelp(
 llvm::cl::NumOccurrencesFlag OccurrencesFlag = llvm::cl::Optional;
 
 static const string MORE_PHASAR_LLVM_HELP(
-#include "../../phasar-llvm_more_help.txt"
+#include "../phasar-llvm_more_help.txt"
     );
 static const string MORE_PHASAR_CLANG_HELP("");
 

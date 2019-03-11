@@ -1,18 +1,7 @@
-/******************************************************************************
- * Copyright (c) 2017 Philipp Schubert.
- * All rights reserved. This program and the accompanying materials are made
- * available under the terms of LICENSE.txt.
- *
- * Contributors:
- *     Philipp Schubert and others
- *****************************************************************************/
-
-/*
- * IFDSTabulationProblemPlugin.h
- *
- *  Created on: 14.06.2017
- *      Author: philipp
- */
+/**
+  * @author Sebastian Roland <sebastianwolfgang.roland@stud.tu-darmstadt.de>
+  *                          <seroland86@gmail.com>
+  */
 
 #ifndef PHASAR_PHASARLLVM_PLUGINS_INTERFACES_IFDSIDE_IFDSTABULATIONPROBLEMPLUGINEXTENDEDVALUE_H_
 #define PHASAR_PHASARLLVM_PLUGINS_INTERFACES_IFDSIDE_IFDSTABULATIONPROBLEMPLUGINEXTENDEDVALUE_H_

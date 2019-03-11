@@ -12,21 +12,25 @@
 #include <vector>
 
 namespace llvm {
+
 class Value;
 } // namespace llvm
 
 namespace psr {
 
-class ExtendedValue {
+class ExtendedValue
+{
 public:
-  ExtendedValue() {}
-  explicit ExtendedValue(const llvm::Value* _value) : value(_value) {
-    assert(value != nullptr && "ExtendedValue requires an llvm::Value* object");
+  ExtendedValue() { }
+  explicit ExtendedValue(const llvm::Value* _value) :
+    value(_value)
+  {
+    assert(value && "ExtendedValue requires an llvm::Value* object");
   }
   ~ExtendedValue() = default;
 
-  bool operator==(const ExtendedValue& rhs) const {
-
+  bool operator==(const ExtendedValue& rhs) const
+  {
     bool isValueEqual = value == rhs.value;
     if (!isValueEqual) return false;
 
@@ -48,8 +52,8 @@ public:
     return true;
   }
 
-  bool operator<(const ExtendedValue& rhs) const {
-
+  bool operator<(const ExtendedValue& rhs) const
+  {
     if (std::less<const llvm::Value*>{}(value, rhs.value)) return true;
     if (std::less<const llvm::Value*>{}(rhs.value, value)) return false;
 
@@ -68,28 +72,70 @@ public:
     return std::less<long>{}(currentVarArgIndex, rhs.currentVarArgIndex);
   }
 
-  const llvm::Value* getValue() const { return value; }
+  const llvm::Value* getValue() const
+  {
+    return value;
+  }
 
-  const std::vector<const llvm::Value*> getMemLocationSeq() const { return memLocationSeq; }
-  void setMemLocationSeq(std::vector<const llvm::Value*> _memLocationSeq) { memLocationSeq = _memLocationSeq; }
+  const std::vector<const llvm::Value*> getMemLocationSeq() const
+  {
+    return memLocationSeq;
+  }
+  void setMemLocationSeq(std::vector<const llvm::Value*> _memLocationSeq)
+  {
+    memLocationSeq = _memLocationSeq;
+  }
 
-  const std::string getEndOfTaintedBlockLabel() const { return endOfTaintedBlockLabel; }
-  void setEndOfTaintedBlockLabel(std::string _endOfTaintedBlockLabel) { endOfTaintedBlockLabel = _endOfTaintedBlockLabel; }
+  const std::string getEndOfTaintedBlockLabel() const
+  {
+    return endOfTaintedBlockLabel;
+  }
+  void setEndOfTaintedBlockLabel(std::string _endOfTaintedBlockLabel)
+  {
+    endOfTaintedBlockLabel = _endOfTaintedBlockLabel;
+  }
 
 
-  const std::vector<const llvm::Value*> getVaListMemLocationSeq() const { return vaListMemLocationSeq; }
-  void setVaListMemLocationSeq(std::vector<const llvm::Value*> _vaListMemLocationSeq) { vaListMemLocationSeq = _vaListMemLocationSeq; }
+  const std::vector<const llvm::Value*> getVaListMemLocationSeq() const
+  {
+    return vaListMemLocationSeq;
+  }
+  void setVaListMemLocationSeq(std::vector<const llvm::Value*> _vaListMemLocationSeq)
+  {
+    vaListMemLocationSeq = _vaListMemLocationSeq;
+  }
 
-  long getVarArgIndex() const { return varArgIndex; }
-  void setVarArgIndex(long _varArgIndex) { varArgIndex = _varArgIndex; }
+  long getVarArgIndex() const
+  {
+    return varArgIndex;
+  }
+  void setVarArgIndex(long _varArgIndex)
+  {
+    varArgIndex = _varArgIndex;
+  }
 
-  void resetVarArgIndex() { if (!isVarArgTemplate()) varArgIndex = -1L; }
+  void resetVarArgIndex()
+  {
+    if (!isVarArgTemplate()) varArgIndex = -1L;
+  }
 
-  long getCurrentVarArgIndex() const { return currentVarArgIndex; }
-  void incrementCurrentVarArgIndex() { if (!isVarArgTemplate()) ++currentVarArgIndex; }
+  long getCurrentVarArgIndex() const
+  {
+    return currentVarArgIndex;
+  }
+  void incrementCurrentVarArgIndex()
+  {
+    if (!isVarArgTemplate()) ++currentVarArgIndex;
+  }
 
-  bool isVarArg() const { return varArgIndex > -1L; }
-  bool isVarArgTemplate() const { return vaListMemLocationSeq.empty() && isVarArg(); }
+  bool isVarArg() const
+  {
+    return varArgIndex > -1L;
+  }
+  bool isVarArgTemplate() const
+  {
+    return vaListMemLocationSeq.empty() && isVarArg();
+  }
 
 private:
   const llvm::Value* value = nullptr;
@@ -106,10 +152,10 @@ private:
 namespace std {
 
 template<>
-struct hash<psr::ExtendedValue> {
-
-  std::size_t operator()(const psr::ExtendedValue& ev) const {
-
+struct hash<psr::ExtendedValue>
+{
+  std::size_t operator()(const psr::ExtendedValue& ev) const
+  {
     std::size_t seed = 0x4711;
 
     seed ^= hash<const llvm::Value*>{}(ev.getValue()) + 0x9e3779b9 + (seed << 6) + (seed >> 2);

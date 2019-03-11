@@ -107,9 +107,8 @@ public:
             std::cout << inst->getFunction()->getName().str() << "\n";
           }
         }
-        //std::cout << "D:\t" << Problem.DtoString(cells[i].c) << " "
-        //          << "\tV:  " << cells[i].v << "\n";
-        std::cout << "D:\t" << Problem.DtoString(cells[i].c) << "\n";
+        std::cout << "D:\t" << Problem.DtoString(cells[i].c) << " "
+                  << "\tV:  " << cells[i].v << "\n";
       }
     }
     std::cout << '\n';

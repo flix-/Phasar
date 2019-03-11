@@ -72,17 +72,9 @@ AnalysisPluginController::AnalysisPluginController(
       }
     }
     if (!IntraMonoProblemPluginFactory.empty()) {
-      LLVMBasedCFG CFG;
-      const llvm::Function *F = ICFG.getMethod(EntryPoints.front());
-
       for (auto Problem : IntraMonoProblemPluginFactory) {
         LOG_IF_ENABLE(BOOST_LOG_SEV(lg, INFO)
                       << "Solving plugin: " << Problem.first);
-        unique_ptr<IntraMonoProblemPlugin> plugin(
-              Problem.second(CFG, F));
-        cout << "DONE" << endl;
-        LLVMIntraMonoSolver<const llvm::Value*, LLVMBasedCFG&> solver(*plugin, true, true);
-        solver.solve();
       }
     }
   }

@@ -13,29 +13,23 @@ using namespace psr;
 
 namespace psr {
 
-class LLVMBasedCFG;
-
 // Maps for registering the plugins
-map<string,
-    unique_ptr<IFDSTabulationProblemPlugin> (*)(LLVMBasedICFG &,
-                                                vector<string>)>
+map<string, unique_ptr<IFDSTabulationProblemPlugin> (*)(LLVMBasedICFG &,
+                                                        vector<string>)>
     IFDSTabulationProblemPluginFactory;
 
-map<string,
-    unique_ptr<IFDSTabulationProblemPluginExtendedValue> (*)(LLVMBasedICFG &,
-                                                             vector<string>)>
+map<string, unique_ptr<IFDSTabulationProblemPluginExtendedValue> (*)(LLVMBasedICFG &,
+                                                                     vector<string>)>
     IFDSTabulationProblemPluginExtendedValueFactory;
 
 map<string,
     unique_ptr<IDETabulationProblemPlugin> (*)(LLVMBasedICFG &, vector<string>)>
     IDETabulationProblemPluginFactory;
 
-map<string,
-    unique_ptr<IntraMonoProblemPlugin> (*)(LLVMBasedCFG&, const llvm::Function*)>
+map<string, unique_ptr<IntraMonoProblemPlugin> (*)()>
     IntraMonoProblemPluginFactory;
 
-map<string,
-    unique_ptr<InterMonoProblemPlugin> (*)()>
+map<string, unique_ptr<InterMonoProblemPlugin> (*)()>
     InterMonoProblemPluginFactory;
 
 map<string,
