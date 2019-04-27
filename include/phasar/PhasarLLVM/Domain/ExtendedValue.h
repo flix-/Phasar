@@ -1,6 +1,5 @@
 /**
-  * @author Sebastian Roland <sebastianwolfgang.roland@stud.tu-darmstadt.de>
-  *                          <seroland86@gmail.com>
+  * @author Sebastian Roland <seroland86@gmail.com>
   */
 
 #ifndef EXTENDEDVALUE_H
