@@ -69,3 +69,22 @@ RUN sed -i "/^my \$PHASAR_BIN/s/=.*$/= '\/usr\/local\/bin\/phasar';/" environmen
     sed -i "/^my \$PLUGIN/s/=.*$/= '\/opt\/build\/IFDSEnvironmentVariableTracing\/libIFDSEnvironmentVariableTracing.so';/" environment-variable-tracing/Tools/run-analysis.pl && \
     cp environment-variable-tracing/Tools/* /usr/local/bin
 
+RUN apt-get -y install cpanminus python-pip
+
+RUN cpanm Clone
+
+RUN apt-get -y remove lcov && \
+    wget https://github.com/linux-test-project/lcov/releases/download/v1.14/lcov-1.14.tar.gz && \
+    tar xvfz lcov-1.14.tar.gz && \
+    cd lcov-1.14 && \
+    make install
+
+RUN git clone https://github.com/travitch/whole-program-llvm && \
+    cd whole-program-llvm && \
+    pip2 install -e .
+
+RUN echo "export LLVM_COMPILER=clang" >> ~/.bashrc && \
+    echo "export LLVM_COMPILER_PATH=/usr/local/bin" >> ~/.bashrc
+
+COPY ./docker/README /opt/
+
