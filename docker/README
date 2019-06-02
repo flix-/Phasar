@@ -1,0 +1,72 @@
+### STATIC ANALYSIS ###
+
+mkdir analysis
+
+# compile application to llvm ir
+
+wget https://curl.haxx.se/download/curl-7.65.0.tar.gz
+tar xvfz curl-7.65.0.tar.gz
+cd curl-7.65.0
+CC=wllvm CFLAGS='-g -O0' ./configure --enable-debug --disable-curldebug --disable-threaded-resolver
+make
+
+# extract bc and save manifest
+extract-bc -m lib/.libs/libcurl.so
+llvm-dis lib/.libs/libcurl.so.bc
+
+cd ..
+
+# move files to analysis folder
+mv curl-7.65.0/lib/.libs/libcurl.so.ll analysis/
+mv curl-7.65.0/lib/.libs/libcurl.so.llvm.manifest analysis/
+
+cd analysis
+
+# preprocess ir
+preprocess-ir.pl libcurl.so.ll libcurl.so.ll.preproc
+# manually adjust manifest file so that paths point to .c files instead of .bc
+
+# create analysis configuration
+echo "getenv" >> tainted-functions.txt
+echo "secure_getenv" >> tainted-functions.txt
+
+echo "dprintf_Pass1" >> blacklisted-functions.txt
+echo "ConnectionExists" >> blacklisted-functions.txt
+echo "multi_runsingle" >> blacklisted-functions.txt
+
+# run analysis
+run-analysis.pl libcurl.so.ll.preproc
+run-analysis.pl libcurl.so.ll.preproc entry-points-1559468233.txt tainted-functions.txt blacklisted-functions.txt
+
+cd ..
+rm -rf curl-7.65.0
+
+### DYNAMIC ANALYSIS ###
+
+tar xvfz curl-7.65.0.tar.gz
+cd curl-7.65.0
+CFLAGS='-g -O0 --coverage' LIBS=-lgcov ./configure --enable-debug --disable-curldebug --disable-threaded-resolver
+make
+
+# capture initial zero coverage data
+lcov -c -i -d . -o app_base.info
+
+# execute tests
+make test
+
+# create final trace
+lcov -c -d . -o app_test.info
+lcov -a app_base.info -a app_test.info -o dynamic-trace.txt
+
+mv dynamic-trace.txt ../analysis/
+
+### REPORT CREATION ###
+
+cd ../analysis
+
+create-report.pl static-Curl_upkeep-1559468403-trace.txt static-Curl_upkeep-1559468403-return-value-trace.txt dynamic-trace.txt libcurl.so.llvm.manifest
+
+### MISC ###
+
+genhtml <trace> -o <dir>
+
